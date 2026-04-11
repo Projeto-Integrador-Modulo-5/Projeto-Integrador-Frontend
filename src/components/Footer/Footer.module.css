@@ -1,0 +1,88 @@
+.footer {
+  background: #1a1a1a;
+  color: #ccc;
+  margin-top: auto;
+}
+
+.inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 32px 24px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 48px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #333;
+  flex-wrap: wrap;
+}
+
+.brand {
+  flex-shrink: 0;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.tagline {
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
+}
+
+.links {
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.linkGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linkTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+}
+
+.link {
+  font-size: 13px;
+  color: #888;
+  transition: color 0.15s;
+}
+
+.link:hover {
+  color: #fff;
+}
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.copy {
+  font-size: 13px;
+  color: #666;
+}
+
+.tech {
+  font-size: 12px;
+  color: #555;
+}
