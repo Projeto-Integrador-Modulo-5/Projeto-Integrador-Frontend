@@ -1,41 +1,28 @@
 import axiosInstance from './axiosInstance';
 
-/**
- * Retorna todos os produtos ativos
- * GET /products
- * @returns {Promise<Array>} lista de produtos
- */
-export const getProducts = async () => {
-  const response = await axiosInstance.get('/products');
-  return response.data;
+// ── Público ──────────────────────────────────────────────────────────────────
+/** GET /products?page=0&size=12  → PageResponse<ProductResponse> */
+export const getProducts = async ({ page = 0, size = 12, search = '' } = {}) => {
+  const params = { page, size };
+  if (search) params.search = search;
+  const { data } = await axiosInstance.get('/products', { params });
+  return data; // { content, page, size, totalElements, totalPages, last }
 };
 
-/**
- * Retorna detalhe de um produto
- * GET /products/:id
- * @param {string} id - UUID do produto
- * @returns {Promise<Object>} produto
- */
+/** GET /products/:id */
 export const getProductById = async (id) => {
-  const response = await axiosInstance.get(`/products/${id}`);
-  return response.data;
+  const { data } = await axiosInstance.get(`/products/${id}`);
+  return data;
 };
 
-/**
- * Retorna o carrinho do usuário autenticado
- * GET /cart
- */
-export const getCart = async () => {
-  const response = await axiosInstance.get('/cart');
-  return response.data;
-};
+// ── Admin (/admin/products) ───────────────────────────────────────────────────
+export const getAdminProductsApi = ({ page = 0, size = 12 } = {}) =>
+  axiosInstance.get('/admin/products', { params: { page, size } });
 
-/**
- * Adiciona item ao carrinho
- * POST /cart/items
- * @param {{ productId: string, size: string, quantity: number }} item
- */
-export const addToCart = async (item) => {
-  const response = await axiosInstance.post('/cart/items', item);
-  return response.data;
-};
+export const createProductApi = (payload)      => axiosInstance.post('/admin/products', payload);
+export const updateProductApi = (id, payload)  => axiosInstance.put(`/admin/products/${id}`, payload);
+export const deactivateProductApi = (id)       => axiosInstance.delete(`/admin/products/${id}`);
+export const uploadProductImageApi = (id, form) =>
+  axiosInstance.post(`/admin/products/${id}/image`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
