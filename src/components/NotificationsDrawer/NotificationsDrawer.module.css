@@ -1,0 +1,220 @@
+/* ── Scrim ────────────────────────────────────────────────────────── */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s;
+}
+.scrimOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Drawer ───────────────────────────────────────────────────────── */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100vw);
+  background: var(--bg);
+  z-index: 51;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
+}
+.drawerOpen {
+  transform: translateX(0);
+}
+
+/* ── Cabeçalho ────────────────────────────────────────────────────── */
+.head {
+  padding: 22px 24px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 12px;
+}
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.unreadBadge {
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent, oklch(0.52 0.16 270));
+  color: white;
+  font-weight: 600;
+}
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.markAllBtn {
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font: inherit;
+  font-family: 'Geist', -apple-system, sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-m);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+.markAllBtn:hover {
+  background: var(--bg2);
+  color: var(--text);
+}
+.closeBtn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--text-m);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.12s, color 0.12s;
+}
+.closeBtn:hover {
+  background: var(--bg2);
+  color: var(--text);
+}
+
+/* ── Corpo ────────────────────────────────────────────────────────── */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.loading {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-m);
+  font-size: 13.5px;
+}
+
+/* ── Item de notificação ──────────────────────────────────────────── */
+.notif {
+  display: grid;
+  grid-template-columns: 40px 1fr 10px;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  align-items: start;
+  transition: background 0.1s;
+}
+.notif:hover {
+  background: var(--bg2);
+}
+.notifUnread {
+  background: color-mix(in srgb, var(--accent, oklch(0.52 0.16 270)) 4%, transparent);
+}
+.notifUnread:hover {
+  background: color-mix(in srgb, var(--accent, oklch(0.52 0.16 270)) 7%, transparent);
+}
+
+.notifIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.notifBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.notifLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+.notifMsg {
+  font-size: 13px;
+  color: var(--text-m);
+  line-height: 1.45;
+}
+.notifTracking {
+  font-size: 12px;
+  color: var(--text-m);
+  margin-top: 2px;
+}
+.notifTracking b {
+  font-family: 'Geist Mono', monospace;
+  color: var(--text);
+}
+.notifTime {
+  font-size: 11.5px;
+  color: var(--text-s);
+  margin-top: 4px;
+}
+
+/* Ponto de não-lido */
+.unreadDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, oklch(0.52 0.16 270));
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+/* ── Estado vazio ─────────────────────────────────────────────────── */
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 32px;
+  gap: 12px;
+}
+.emptyIcon {
+  color: var(--text-s);
+  opacity: 0.35;
+  margin-bottom: 4px;
+}
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.emptySub {
+  font-size: 13px;
+  color: var(--text-m);
+  max-width: 280px;
+  line-height: 1.55;
+  margin: 0;
+}

@@ -1,43 +1,67 @@
+import { useState } from 'react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
 
   return (
     <footer className={styles.footer}>
-      <div className={styles.inner}>
-        <div className={styles.top}>
-          <div className={styles.brand}>
-            <span className={styles.logo}>TeeStore</span>
-            <p className={styles.tagline}>Camisetas premium para o seu estilo.</p>
-          </div>
+      <div className={styles.footerRow}>
 
-          <div className={styles.links}>
-            <div className={styles.linkGroup}>
-              <h4 className={styles.linkTitle}>Loja</h4>
-              <a href="#" className={styles.link}>Produtos</a>
-              <a href="#" className={styles.link}>Novidades</a>
-              <a href="#" className={styles.link}>Promoções</a>
-            </div>
-            <div className={styles.linkGroup}>
-              <h4 className={styles.linkTitle}>Conta</h4>
-              <a href="#" className={styles.link}>Meu Perfil</a>
-              <a href="#" className={styles.link}>Meus Pedidos</a>
-              <a href="#" className={styles.link}>Endereços</a>
-            </div>
-            <div className={styles.linkGroup}>
-              <h4 className={styles.linkTitle}>Suporte</h4>
-              <a href="#" className={styles.link}>Contato</a>
-              <a href="#" className={styles.link}>Trocas e Devoluções</a>
-              <a href="#" className={styles.link}>Política de Privacidade</a>
-            </div>
-          </div>
+        {/* Brand + newsletter */}
+        <div>
+          <div className={styles.footerBrand}>TeeStore</div>
+          <p className={styles.footerTag}>
+            Camisetas premium para o seu estilo. Algodão peruano, costura reforçada, modelagem certa.
+          </p>
+          <form className={styles.newsletter} onSubmit={(e) => e.preventDefault()}>
+            <input
+              className={styles.newsletterInput}
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+            />
+            <button className={styles.newsletterBtn} type="submit">Inscrever</button>
+          </form>
         </div>
 
-        <div className={styles.bottom}>
-          <p className={styles.copy}>© {currentYear} TeeStore. Todos os direitos reservados.</p>
-          <p className={styles.tech}>Feito com React + Spring Boot</p>
+        {/* Loja */}
+        <div>
+          <h4 className={styles.colTitle}>Loja</h4>
+          <ul className={styles.colList}>
+            <li><a href="#" className={styles.colLink}>Produtos</a></li>
+            <li><a href="#" className={styles.colLink}>Novidades</a></li>
+            <li><a href="#" className={styles.colLink}>Promoções</a></li>
+            <li><a href="#" className={styles.colLink}>Coleções</a></li>
+          </ul>
         </div>
+
+        {/* Conta */}
+        <div>
+          <h4 className={styles.colTitle}>Conta</h4>
+          <ul className={styles.colList}>
+            <li><a href="/profile" className={styles.colLink}>Meu Perfil</a></li>
+            <li><a href="/orders" className={styles.colLink}>Meus Pedidos</a></li>
+            <li><a href="/profile?tab=addresses" className={styles.colLink}>Endereços</a></li>
+            <li><a href="#" className={styles.colLink}>Favoritos</a></li>
+          </ul>
+        </div>
+
+        {/* Suporte */}
+        <div>
+          <h4 className={styles.colTitle}>Suporte</h4>
+          <ul className={styles.colList}>
+            <li><a href="#" className={styles.colLink}>Contato</a></li>
+            <li><a href="#" className={styles.colLink}>Trocas e Devoluções</a></li>
+            <li><a href="#" className={styles.colLink}>Política de Privacidade</a></li>
+            <li><a href="#" className={styles.colLink}>FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div className={styles.footerBase}>
+        <div>© {new Date().getFullYear()} TeeStore. Todos os direitos reservados.</div>
       </div>
     </footer>
   );
