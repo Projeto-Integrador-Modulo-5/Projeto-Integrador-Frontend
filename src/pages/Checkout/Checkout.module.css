@@ -1,0 +1,226 @@
+.page {
+  flex: 1;
+  background: #f5f5f5;
+  padding: 40px 16px;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 32px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.section, .summary {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+
+.loading { color: #777; font-size: 14px; }
+
+.addrList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.addrCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  position: relative;
+  transition: border 0.15s;
+}
+.addrCard:hover { border-color: #999; }
+
+.addrSelected { border-color: #1a1a1a; background: #fafafa; }
+
+.addrLine { font-size: 13px; color: #444; line-height: 1.6; }
+
+.defaultBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.addAddrBtn {
+  box-sizing: border-box;
+  background: none;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #555;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.addAddrBtn:hover { border-color: #1a1a1a; color: #1a1a1a; }
+
+.cancelAddrBtn {
+  background: none;
+  border: none;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #999;
+  cursor: pointer;
+  display: block;
+  transition: color 0.15s;
+}
+.cancelAddrBtn:hover { color: #b91c1c; }
+
+.newAddrForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 10px;
+}
+
+.input, .inputSm {
+  padding: 10px 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1a1a1a;
+  outline: none;
+  transition: border 0.15s;
+}
+.input:focus, .inputSm:focus { border-color: #1a1a1a; }
+
+.saveAddrBtn {
+  padding: 10px;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.saveAddrBtn:disabled { opacity: 0.6; }
+
+/* Resumo */
+.itemList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.summaryItem {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px;
+}
+
+.itemName { font-size: 14px; font-weight: 600; color: #1a1a1a; grid-column: 1; }
+.itemMeta { font-size: 12px; color: #777; grid-column: 1; }
+.itemSubtotal { font-size: 14px; font-weight: 700; color: #1a1a1a; grid-row: 1 / span 2; align-self: center; justify-self: end; }
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid #e8e8e8;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.errorBox {
+  background: #fff5f5;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.confirmBtn {
+  width: 100%;
+  padding: 14px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+.confirmBtn:hover:not(:disabled) { background: #333; }
+.confirmBtn:disabled { opacity: 0.5; }
+
+/* Sucesso */
+.successCard {
+  max-width: 400px;
+  margin: 80px auto;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 48px 32px;
+}
+
+.successIcon {
+  width: 56px;
+  height: 56px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.successCard h2 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+.successCard p  { font-size: 14px; color: #777; }
