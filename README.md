@@ -1,6 +1,346 @@
-# TeeStore — Projeto Integrador Frontend
+# TeeStore — Frontend
 
-Frontend em React (Vite) para uma loja de camisetas com área do cliente e painel administrativo. O app integra com API REST e recebe notificações em tempo real via WebSocket (STOMP/SockJS).
+Aplicacao React (Vite) da plataforma TeeStore. Loja de camisetas com area do cliente, carrinho, checkout, acompanhamento de pedidos em tempo real e painel administrativo. Integra com API REST (Spring Boot) e recebe notificacoes via WebSocket STOMP/SockJS.
+
+---
+
+## Sumário
+
+- [Arquitetura](#arquitetura)
+- [Tecnologias](#tecnologias)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Páginas e Rotas](#páginas-e-rotas)
+- [Componentes](#componentes)
+- [Hooks](#hooks)
+- [Contextos](#contextos)
+- [Camada de API](#camada-de-api)
+- [Notificações em Tempo Real](#notificações-em-tempo-real)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [Como Rodar](#como-rodar)
+
+---
+
+## Arquitetura
+
+```mermaid
+graph TD
+    subgraph FE["Frontend React :5173"]
+        ROUTER[React Router v7]
+
+        subgraph CTX["Contextos"]
+            AUTH_CTX[AuthContext]
+            CART_CTX[CartContext]
+        end
+
+        subgraph PAGES["Paginas"]
+            HOME[Home]
+            LOGIN[Login]
+            REGISTER[Register]
+            CHECKOUT[Checkout]
+            ORDERS[Orders]
+            PROFILE[Profile]
+            ADMIN_DASH[Admin Dashboard]
+            ADMIN_PRODS[Admin Produtos]
+            ADMIN_ORDS[Admin Pedidos]
+        end
+
+        subgraph COMPS["Componentes"]
+            HEADER[Header]
+            CART_DR[CartDrawer]
+            NOTIF_DR[NotificationsDrawer]
+            FAV_DR[FavoritesDrawer]
+            TOAST[NotificationToast]
+        end
+
+        subgraph HOOKS["Hooks"]
+            USE_NOTIF[useNotifications]
+            USE_WS[useWebSocket]
+        end
+
+        subgraph API["Camada de API"]
+            AUTH_API[authApi]
+            ORDER_API[orderApi]
+            CART_API[cartApi]
+            PROD_API[productApi]
+            USER_API[userApi]
+            NOTIF_API[notificationApi]
+            ADMIN_API[adminApi]
+            AXIOS[axiosInstance]
+        end
+    end
+
+    BE["Backend :8080"]
+    NS["Notification Service :8083"]
+
+    ROUTER --> PAGES
+    PAGES --> API
+    HOOKS --> NS
+    API --> AXIOS
+    AXIOS -->|REST + Bearer JWT| BE
+    USE_NOTIF -->|WebSocket STOMP| NS
+    NS -->|/topic/notifications/userId| USE_NOTIF
+    USE_NOTIF -->|CustomEvent teestore-order-update| ORDERS
+    USE_NOTIF -->|toastQueue| TOAST
+```
+
+---
+
+## Tecnologias
+
+| Tecnologia | Versao | Uso |
+|---|---|---|
+| React | 19 | UI |
+| Vite | 8 | Build + Dev server |
+| React Router | 7 | Roteamento SPA |
+| Axios | 1.x | Requisicoes HTTP |
+| @stomp/stompjs | 7.x | Cliente WebSocket STOMP |
+| sockjs-client | 1.x | Fallback WebSocket |
+| CSS Modules | — | Estilos escopados por componente |
+| Geist / Geist Mono | — | Tipografia |
+
+---
+
+## Estrutura do Projeto
+
+```
+src/
+├── api/
+│   ├── axiosInstance.js       # Axios com interceptors JWT + refresh automatico
+│   ├── authApi.js             # login, register, refresh, logout
+│   ├── cartApi.js             # getCart, addItem, updateItem, removeItem, clear
+│   ├── orderApi.js            # createOrder, getUserOrders, getOrderById
+│   ├── productApi.js          # getProducts, getProductById
+│   ├── userApi.js             # getMe, updateMe, updatePassword, addresses
+│   ├── notificationApi.js     # getNotifications, markAsRead, markAllAsRead
+│   └── adminApi.js            # products CRUD, orders, dashboard
+│
+├── context/
+│   ├── AuthContext.jsx        # Estado global de autenticacao + refresh token
+│   └── CartContext.jsx        # Estado global do carrinho
+│
+├── hooks/
+│   ├── useNotifications.js    # WebSocket STOMP + REST sync + toastQueue
+│   └── useWebSocket.js        # Hook generico de WebSocket
+│
+├── components/
+│   ├── Header/                # Navegacao, busca, carrinho, notificacoes, favoritos
+│   ├── CartDrawer/            # Drawer lateral do carrinho
+│   ├── NotificationsDrawer/   # Drawer lateral de notificacoes
+│   ├── FavoritesDrawer/       # Drawer lateral de favoritos
+│   ├── NotificationToast/     # Pop-ups de notificacao em tempo real
+│   ├── ProductCard/           # Card de produto na listagem
+│   ├── Footer/                # Rodape
+│   ├── AdminLayout/           # Layout do painel admin
+│   └── ProtectedRoute.jsx     # Guarda de rota (autenticacao + ADMIN)
+│
+└── pages/
+    ├── Home/                  # Listagem de produtos + busca + paginacao
+    ├── Login/                 # Formulario de login
+    ├── Register/              # Formulario de cadastro
+    ├── Checkout/              # Finalizacao de pedido
+    ├── Orders/                # Historico de pedidos (atualiza em tempo real)
+    ├── Profile/               # Perfil, dados pessoais, enderecos, seguranca
+    └── Admin/
+        ├── Dashboard/         # Metricas: receita, pedidos, usuarios, produtos
+        ├── Products/          # CRUD de produtos com upload de imagem
+        └── Orders/            # Gestao de pedidos com filtro por status
+```
+
+---
+
+## Páginas e Rotas
+
+| Rota | Pagina | Auth | Descricao |
+|---|---|---|---|
+| `/` | Home | — | Listagem de produtos com busca e paginacao |
+| `/login` | Login | — | Formulario de autenticacao |
+| `/register` | Register | — | Cadastro de novo usuario |
+| `/checkout` | Checkout | Usuario | Finalizacao de pedido |
+| `/orders` | Orders | Usuario | Historico com status em tempo real |
+| `/profile` | Profile | Usuario | Perfil, senha, enderecos, favoritos |
+| `/admin` | Admin Dashboard | Admin | Metricas e resumo da loja |
+| `/admin/products` | Admin Products | Admin | Listagem, criacao, edicao, upload de imagem |
+| `/admin/orders` | Admin Orders | Admin | Gestao de pedidos com filtro por status |
+
+---
+
+## Componentes
+
+**Header**
+Barra de navegacao com logo, busca, icones de favoritos, carrinho e notificacoes (com badge de nao lidas). Abre drawers laterais ao clicar em cada icone.
+
+**CartDrawer**
+Drawer lateral com itens do carrinho, quantidades, totais e botao de ir para checkout.
+
+**NotificationsDrawer**
+Drawer lateral com historico de notificacoes do usuario. Marca como lida ao abrir.
+
+**FavoritesDrawer**
+Drawer lateral com produtos favoritados (persistidos em localStorage).
+
+**NotificationToast**
+Pop-ups de notificacao que aparecem automaticamente no canto da tela quando chega uma mensagem via WebSocket. Auto-dismiss com temporizador.
+
+**ProductCard**
+Card de produto com imagem, nome, preco, tamanhos disponiveis e botao de adicionar ao carrinho.
+
+**ProtectedRoute**
+HOC que redireciona para `/login` se o usuario nao estiver autenticado, ou para `/` se nao for ADMIN (para rotas administrativas).
+
+---
+
+## Hooks
+
+### `useNotifications(userId)`
+
+Gerencia o ciclo completo de notificacoes:
+
+1. Busca notificacoes persistidas via `GET /notifications`
+2. Abre conexao WebSocket STOMP em `ws://localhost:8083/ws`
+3. Se inscreve em `/topic/notifications/{userId}`
+4. Quando chega mensagem:
+   - Adiciona ao estado `notifications` (drawer)
+   - Enfileira em `toastQueue` (pop-up)
+   - Dispara `CustomEvent('teestore-order-update')` para re-fetch automatico em `Orders.jsx`
+   - Sincroniza com o banco apos 1s (para pegar ID real persistido)
+5. Reconexao automatica a cada 5s em caso de queda
+
+```
+Retorno: { notifications, unreadCount, connected, markAllRead, refresh, toastQueue, dismissToast }
+```
+
+### Atualização Automática de Pedidos
+
+```mermaid
+sequenceDiagram
+    participant WS as WebSocket (NS)
+    participant Hook as useNotifications
+    participant Event as DOM Event
+    participant Orders as Orders.jsx
+
+    WS->>Hook: Mensagem STOMP recebida
+    Hook->>Hook: Adiciona ao toastQueue
+    Hook->>Event: dispatchEvent(teestore-order-update)
+    Event->>Orders: addEventListener recebe
+    Orders->>Orders: fetchOrders() -- re-busca GET /orders/my
+    Orders->>Orders: Lista atualiza sem recarregar a pagina
+```
+
+---
+
+## Contextos
+
+**AuthContext**
+Gerencia estado de autenticacao global:
+- Persiste `accessToken`, `refreshToken`, `user` no `localStorage`
+- `axiosInstance` usa interceptor para incluir `Authorization: Bearer {token}` automaticamente
+- Em caso de 401, tenta refresh token antes de redirecionar para login
+- Expoe `user`, `login`, `logout`, `isAdmin`
+
+**CartContext**
+Gerencia estado do carrinho global:
+- Sincroniza com `GET /cart` ao fazer login
+- Expoe `cartItems`, `cartCount`, `addToCart`, `removeFromCart`, `clearCart`
+
+---
+
+## Camada de API
+
+Todos os modulos de API usam o `axiosInstance` centralizado com:
+- `baseURL` configurada via `VITE_API_URL`
+- Interceptor de request: injeta `Authorization: Bearer {token}`
+- Interceptor de response: em 401, tenta `POST /auth/refresh` e reexecuta a requisicao original
+
+```javascript
+// axiosInstance.js — fluxo de refresh automatico
+instance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      const newToken = await refreshAccessToken();
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      return instance(originalRequest);
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+---
+
+## Notificações em Tempo Real
+
+O fluxo completo de ponta a ponta:
+
+```
+Usuario faz pedido
+       |
+Backend publica order.created no Kafka
+       |
+Logistics Service processa (8s)
+       |
+Kafka: order.status.updated SHIPPED
+       |
+Notification Service -> WebSocket -> browser
+       |
++------+------+
+|             |
+Toast popup   Orders.jsx re-faz fetch
+aparece       e atualiza status na tela
+```
+
+Nao e necessario recarregar a pagina. Tudo acontece automaticamente via `CustomEvent` + `addEventListener`.
+
+---
+
+## Variáveis de Ambiente
+
+Copie `.env.example` para `.env`:
+
+```env
+VITE_API_URL=http://localhost:8080
+VITE_WS_URL=http://localhost:8083/ws
+```
+
+---
+
+## Como Rodar
+
+**Pre-requisitos:** Node.js 18+, npm ou yarn
+
+```bash
+# 1. Instale as dependencias
+cd Projeto-Integrador-Frontend
+npm install
+
+# 2. Configure as variaveis
+cp .env.example .env
+
+# 3. Execute em modo desenvolvimento
+npm run dev
+```
+
+O app abre em `http://localhost:5173`.
+
+**Build para producao:**
+```bash
+npm run build
+npm run preview
+```
+
+---
+
+## Acesso Admin
+
+```
+Email:  admin@teestore.com
+Senha:  admin123
+```
+
+---
+
+*Projeto Integrador — Desenvolvido por Victor Hugo, Josue Felix e Guilherme Bastos*
 
 ## Principais pontos do projeto
 1. **E-commerce completo**: catálogo, busca, filtros, favoritos, carrinho e checkout.
