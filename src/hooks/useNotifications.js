@@ -8,10 +8,11 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8083/ws';
 /**
  * Hook para notificações: busca persistidas na API + recebe em tempo real via WebSocket.
  * @param {string|null} userId - UUID do usuário logado.
- * @returns {{ notifications, unreadCount, connected, markAllRead, refresh }}
+ * @returns {{ notifications, unreadCount, connected, markAllRead, refresh, toastQueue, dismissToast }}
  */
 export function useNotifications(userId) {
   const [notifications, setNotifications] = useState([]);
+  const [toastQueue, setToastQueue]       = useState([]);
   const [connected, setConnected]         = useState(false);
   const clientRef = useRef(null);
 
@@ -46,23 +47,30 @@ export function useNotifications(userId) {
             const payload = JSON.parse(frame.body);
             console.log('[Notifications] Nova notificação recebida:', payload);
 
+            const newNotif = {
+              id:           payload.id ?? `ws-${Date.now()}`,
+              orderId:      payload.orderId,
+              type:         payload.type,
+              message:      payload.message,
+              trackingCode: payload.trackingCode,
+              sentAt:       payload.sentAt || new Date().toISOString(),
+              read:         false,
+            };
+
             // Adiciona no topo sem duplicar (o backend já persistiu, mas pode chegar antes do refresh)
             setNotifications((prev) => {
-              const newNotif = {
-                id:           payload.id ?? `ws-${Date.now()}`,
-                orderId:      payload.orderId,
-                type:         payload.type,
-                message:      payload.message,
-                trackingCode: payload.trackingCode,
-                sentAt:       payload.sentAt || new Date().toISOString(),
-                read:         false,
-              };
               // Evita duplicata por orderId+type
               const exists = prev.some(
                 (n) => n.orderId === newNotif.orderId && n.type === newNotif.type && !n.id?.toString().startsWith('ws-')
               );
               return exists ? prev : [newNotif, ...prev];
             });
+
+            // Enfileira no toast para exibir pop-up
+            setToastQueue((prev) => [...prev, newNotif]);
+
+            // Avisa outros componentes (ex: Orders.jsx) para re-buscar dados
+            window.dispatchEvent(new CustomEvent('teestore-order-update', { detail: newNotif }));
 
             // Sincroniza com o banco após 1s para pegar o ID real persistido
             setTimeout(refresh, 1000);
@@ -88,7 +96,12 @@ export function useNotifications(userId) {
     } catch {}
   }, []);
 
+  /** Remove uma notificação do toast (dismiss manual ou auto-dismiss) */
+  const dismissToast = useCallback((id) => {
+    setToastQueue((prev) => prev.filter((n) => String(n.id) !== String(id)));
+  }, []);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  return { notifications, unreadCount, connected, markAllRead, refresh };
+  return { notifications, unreadCount, connected, markAllRead, refresh, toastQueue, dismissToast };
 }
