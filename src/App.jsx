@@ -10,6 +10,7 @@ import Footer from './components/Footer/Footer';
 import CartDrawer from './components/CartDrawer/CartDrawer';
 import FavoritesDrawer from './components/FavoritesDrawer/FavoritesDrawer';
 import NotificationsDrawer from './components/NotificationsDrawer/NotificationsDrawer';
+import NotificationToast from './components/NotificationToast/NotificationToast';
 import AdminLayout from './components/AdminLayout/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -57,7 +58,7 @@ function StoreLayout() {
   const [favOpen,   setFavOpen]   = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const { notifications, unreadCount, refresh: refreshNotifs } = useNotifications(user?.id);
+  const { notifications, unreadCount, refresh: refreshNotifs, toastQueue, dismissToast } = useNotifications(user?.id);
   const favCount = useFavCount();
 
   return (
@@ -79,6 +80,8 @@ function StoreLayout() {
         realtimeNotifs={notifications}
         onMarkedRead={refreshNotifs}
       />
+      {/* Pop-up toast — aparece no canto inferior direito ao receber mensagem Kafka via WebSocket */}
+      <NotificationToast notifications={toastQueue} onDismiss={dismissToast} />
       <Routes>
         <Route path="/"         element={<HomeRoute />} />
         <Route path="/login"    element={<Login />} />

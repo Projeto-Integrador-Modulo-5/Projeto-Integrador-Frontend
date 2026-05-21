@@ -301,12 +301,22 @@ export default function Orders() {
   const [filter, setFilter]   = useState('all');
   const [toast, setToast]     = useState(null);
 
-  useEffect(() => {
+  const fetchOrders = useCallback(() => {
+    setLoading(true);
     getUserOrdersApi()
       .then(({ data }) => setOrders(Array.isArray(data) ? data : []))
       .catch(() => setError('Não foi possível carregar os pedidos.'))
       .finally(() => setLoading(false));
   }, []);
+
+  // Carrega pedidos ao montar
+  useEffect(() => { fetchOrders(); }, [fetchOrders]);
+
+  // Re-busca automaticamente quando chegar atualização de status via WebSocket
+  useEffect(() => {
+    window.addEventListener('teestore-order-update', fetchOrders);
+    return () => window.removeEventListener('teestore-order-update', fetchOrders);
+  }, [fetchOrders]);
 
   const handleLogout = async () => { await logout(); navigate('/'); };
 
